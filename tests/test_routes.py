@@ -123,7 +123,7 @@ class TestAccountService(TestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
-    # ADD YOUR TEST CASES HERE ...
+    # TEST CASES FOR READING THE ACCOUNT HERE ...
 
     def test_get_account(self):
         """It should Read a single Account"""
@@ -139,3 +139,35 @@ class TestAccountService(TestCase):
         """It should not Read an Account that is not found"""
         resp = self.client.get(f"{BASE_URL}/0")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+
+# TEST CASES FOR LISTING THE ACCOUNT HERE ...
+
+
+    def test_get_account_list(self):
+        """It should Get a list of Accounts"""
+        self._create_accounts(5)
+        resp = self.client.get(BASE_URL)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.get_json()
+        self.assertEqual(len(data), 5)
+
+    def test_get_account_list_empty(self):
+        """It should return an empty list when no accounts exist"""
+        resp = self.client.get(BASE_URL)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.get_json()
+        self.assertEqual(len(data), 0)  # Expecting an empty list
+
+    def test_invalid_list_accounts_route(self):
+        """It should return 404 for an invalid route"""
+        resp = self.client.get(f"{BASE_URL}/invalid")
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+    
+    def test_list_accounts_invalid_methods(self):
+        """It should not allow unsupported HTTP methods on /accounts"""
+        for method in ["put", "delete", "patch"]:
+            resp = getattr(self.client, method)(BASE_URL)
+            self.assertEqual(resp.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
